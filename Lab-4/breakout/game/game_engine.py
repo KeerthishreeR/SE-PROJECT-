@@ -1,11 +1,9 @@
 """
 GameEngine: owns the paddle, ball, and bricks.
 
-Starter version: single brick type, no lives yet, no score/combo yet.
-Ball-brick collision also has a known bug (see game/collision.py) that
-Task 1 asks you to fix. If the ball falls below the paddle, it just
-resets to the starting position with no consequence - that's what
-Task 2 builds on.
+Features: brick removal on last hit (Task 1), 3 lives + game over +
+restart with R (Task 2), normal/strong/unbreakable bricks (Task 3),
+and a score with a combo multiplier (Task 4).
 """
 
 import pygame
@@ -26,6 +24,9 @@ BRICK_TOP_MARGIN = 50
 
 STARTING_LIVES = 3
 
+POINTS_PER_HIT = 10
+MAX_MULTIPLIER = 8
+
 STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
 STATE_WON = "won"
@@ -41,7 +42,14 @@ class GameEngine:
         self.ball = Ball(x=WIDTH / 2, y=HEIGHT - 50)
         self.bricks = self._build_bricks()
         self.lives = STARTING_LIVES
+        self.score = 0
+        self.combo = 0          # consecutive brick hits since the last miss
         self.state = STATE_PLAYING
+
+    @property
+    def multiplier(self):
+        """Score multiplier: x1 to start, +1 per consecutive hit, capped."""
+        return max(1, min(MAX_MULTIPLIER, self.combo))
 
     def _build_bricks(self):
         bricks = []
@@ -86,6 +94,7 @@ class GameEngine:
 
     def _lose_life(self):
         self.lives -= 1
+        self.combo = 0          # missing the ball resets the combo
         if self.lives <= 0:
             self.state = STATE_GAME_OVER
         else:
@@ -103,6 +112,12 @@ class GameEngine:
 
         for brick in self.bricks:
             if handle_ball_brick_collision(self.ball, brick):
+                # Task 4: every hit on a breakable brick builds the combo
+                # and scores points x the current multiplier. Hitting an
+                # unbreakable brick neither scores nor breaks the combo.
+                if brick.breakable:
+                    self.combo += 1
+                    self.score += POINTS_PER_HIT * self.multiplier
                 # Task 1 fix: a brick whose hits run out is removed.
                 # Unbreakable bricks never report destroyed.
                 if brick.hit():
@@ -120,6 +135,7 @@ class GameEngine:
         from game import renderer
         renderer.draw_scene(surface, self.paddle, self.ball, self.bricks)
         renderer.draw_text(surface, font, f"Bricks left: {self._breakable_left()}", (10, 10))
+        renderer.draw_text(surface, font, f"Score: {self.score}  x{self.multiplier}", (200, 10))
         renderer.draw_text(surface, font, f"Lives: {self.lives}", (WIDTH - 110, 10))
         if self.state == STATE_GAME_OVER:
             renderer.draw_banner(surface, font, "GAME OVER - press R to restart")
