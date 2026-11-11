@@ -12,7 +12,7 @@ import pygame
 
 from game.paddle import Paddle
 from game.ball import Ball
-from game.brick import Brick
+from game.brick import Brick, NORMAL, STRONG, UNBREAKABLE
 from game.collision import handle_ball_brick_collision
 from game.renderer import WIDTH, HEIGHT
 
@@ -28,6 +28,7 @@ STARTING_LIVES = 3
 
 STATE_PLAYING = "playing"
 STATE_GAME_OVER = "game_over"
+STATE_WON = "won"
 
 
 class GameEngine:
@@ -50,8 +51,20 @@ class GameEngine:
             for col in range(BRICK_COLS):
                 x = start_x + col * (BRICK_WIDTH + BRICK_GAP)
                 y = BRICK_TOP_MARGIN + row * (BRICK_HEIGHT + BRICK_GAP)
-                bricks.append(Brick(x, y, BRICK_WIDTH, BRICK_HEIGHT))
+                bricks.append(Brick(x, y, BRICK_WIDTH, BRICK_HEIGHT, self._brick_kind(row, col)))
         return bricks
+
+    @staticmethod
+    def _brick_kind(row, col):
+        """Layout: strong top row, unbreakable bricks on the edges of row 1."""
+        if row == 1 and col in (0, BRICK_COLS - 1):
+            return UNBREAKABLE
+        if row == 0:
+            return STRONG
+        return NORMAL
+
+    def _breakable_left(self):
+        return sum(1 for b in self.bricks if b.breakable)
 
     def _reset_ball(self):
         self.ball = Ball(x=WIDTH / 2, y=HEIGHT - 50)
@@ -68,7 +81,7 @@ class GameEngine:
 
     def handle_keydown(self, key):
         # Press R after the game ends to restart.
-        if self.state == STATE_GAME_OVER and key == pygame.K_r:
+        if self.state in (STATE_GAME_OVER, STATE_WON) and key == pygame.K_r:
             self.reset()
 
     def _lose_life(self):
@@ -90,11 +103,15 @@ class GameEngine:
 
         for brick in self.bricks:
             if handle_ball_brick_collision(self.ball, brick):
-                brick.hits_remaining -= 1
-                # FIX (Task 1): once the hits are used up, remove the brick.
-                if brick.hits_remaining <= 0:
+                # Task 1 fix: a brick whose hits run out is removed.
+                # Unbreakable bricks never report destroyed.
+                if brick.hit():
                     self.bricks.remove(brick)
                 break
+
+        if self._breakable_left() == 0:
+            self.state = STATE_WON
+            return
 
         if self.ball.is_below(HEIGHT):
             self._lose_life()
@@ -102,7 +119,9 @@ class GameEngine:
     def draw(self, surface, font):
         from game import renderer
         renderer.draw_scene(surface, self.paddle, self.ball, self.bricks)
-        renderer.draw_text(surface, font, f"Bricks left: {len(self.bricks)}", (10, 10))
+        renderer.draw_text(surface, font, f"Bricks left: {self._breakable_left()}", (10, 10))
         renderer.draw_text(surface, font, f"Lives: {self.lives}", (WIDTH - 110, 10))
         if self.state == STATE_GAME_OVER:
             renderer.draw_banner(surface, font, "GAME OVER - press R to restart")
+        elif self.state == STATE_WON:
+            renderer.draw_banner(surface, font, "YOU WIN! - press R to restart")

@@ -16,8 +16,14 @@ COLOR_TEXT = (255, 255, 255)
 def draw_scene(surface, paddle, ball, bricks):
     surface.fill(COLOR_BG)
     for brick in bricks:
-        pygame.draw.rect(surface, brick.color, brick.get_rect())
-        pygame.draw.rect(surface, (10, 10, 15), brick.get_rect(), 1)
+        rect = brick.get_rect()
+        pygame.draw.rect(surface, brick.color, rect)
+        pygame.draw.rect(surface, (10, 10, 15), rect, 1)
+        if not brick.breakable:
+            # Unbreakable: grey with a bold border and an X so it stands out.
+            pygame.draw.rect(surface, (235, 235, 240), rect, 2)
+            pygame.draw.line(surface, (235, 235, 240), rect.topleft, rect.bottomright, 2)
+            pygame.draw.line(surface, (235, 235, 240), rect.topright, rect.bottomleft, 2)
     pygame.draw.rect(surface, COLOR_PADDLE, paddle.get_rect(), border_radius=4)
     pygame.draw.circle(surface, COLOR_BALL, (int(ball.x), int(ball.y)), ball.radius)
 
