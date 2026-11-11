@@ -24,11 +24,23 @@ BRICK_GAP = 6
 BRICK_TOP_MARGIN = 50
 
 
+STARTING_LIVES = 3
+
+STATE_PLAYING = "playing"
+STATE_GAME_OVER = "game_over"
+
+
 class GameEngine:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
+        """(Re)start a fresh game: full lives, new bricks, ball at start."""
         self.paddle = Paddle(x=WIDTH / 2, y=HEIGHT - 30)
         self.ball = Ball(x=WIDTH / 2, y=HEIGHT - 50)
         self.bricks = self._build_bricks()
+        self.lives = STARTING_LIVES
+        self.state = STATE_PLAYING
 
     def _build_bricks(self):
         bricks = []
@@ -45,6 +57,8 @@ class GameEngine:
         self.ball = Ball(x=WIDTH / 2, y=HEIGHT - 50)
 
     def handle_input(self, keys_pressed):
+        if self.state != STATE_PLAYING:
+            return
         dx = 0
         if keys_pressed[pygame.K_LEFT]:
             dx -= self.paddle.speed
@@ -53,9 +67,21 @@ class GameEngine:
         self.paddle.move(dx, WIDTH)
 
     def handle_keydown(self, key):
-        pass
+        # Press R after the game ends to restart.
+        if self.state == STATE_GAME_OVER and key == pygame.K_r:
+            self.reset()
+
+    def _lose_life(self):
+        self.lives -= 1
+        if self.lives <= 0:
+            self.state = STATE_GAME_OVER
+        else:
+            self._reset_ball()
 
     def update(self):
+        if self.state != STATE_PLAYING:
+            return
+
         self.ball.update()
         self.ball.bounce_off_walls(WIDTH)
 
@@ -71,9 +97,12 @@ class GameEngine:
                 break
 
         if self.ball.is_below(HEIGHT):
-            self._reset_ball()
+            self._lose_life()
 
     def draw(self, surface, font):
         from game import renderer
         renderer.draw_scene(surface, self.paddle, self.ball, self.bricks)
         renderer.draw_text(surface, font, f"Bricks left: {len(self.bricks)}", (10, 10))
+        renderer.draw_text(surface, font, f"Lives: {self.lives}", (WIDTH - 110, 10))
+        if self.state == STATE_GAME_OVER:
+            renderer.draw_banner(surface, font, "GAME OVER - press R to restart")
