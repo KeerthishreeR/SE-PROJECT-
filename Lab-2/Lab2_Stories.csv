@@ -1,0 +1,15 @@
+Issue Type,Summary,Description,Priority,Story Points,Parent (Epic),Sprint
+Epic,Epic 1: FEFO Stock Allocation,Record every delivered batch and always dispense from the valid batch that expires first.,Medium,,,
+Epic,Epic 2: Expiry Monitoring and Alerts,Warn staff about batches nearing expiry early enough to act on them.,Medium,,,
+Epic,Epic 3: Re-order and Supplier Dispatch,Turn low stock into purchase orders that suppliers can see once they are dispatched.,Medium,,,
+Epic,Epic 4: Inventory Visibility and Performance,Give staff a clear view of stock and give managers proof that the system performs.,Medium,,,
+Story,Story 1.1: Record delivered batches,"As a pharmacy technician, I want to register each delivery with its batch number, expiry date and quantity, so that every pack on the shelf can be traced.",High,3,Epic 1: FEFO Stock Allocation,Sprint 1
+Story,Story 1.2: Allocate earliest-expiring batch,"As a pharmacist, I want the system to pick the valid batch with the earliest expiry date when I dispense, so that older stock leaves the shelf first.",Highest,5,Epic 1: FEFO Stock Allocation,Sprint 1
+Story,Story 1.3: Reject expired batch at checkout,"As a cashier, I want an expired batch to be rejected at checkout and the next valid batch suggested, so that I never sell out-of-date medicine.",Highest,5,Epic 1: FEFO Stock Allocation,Sprint 1
+Story,Story 2.1: 30-day expiry warning list,"As a pharmacy manager, I want a daily list of batches expiring within 30 days, so that I can return or discount them in time.",High,3,Epic 2: Expiry Monitoring and Alerts,Sprint 1
+Story,Story 2.2: Dashboard expiry alerts,"As a pharmacist, I want near-expiry alerts shown on my dashboard when I log in, so that I notice them without running a report.",Medium,2,Epic 2: Expiry Monitoring and Alerts,Sprint 2
+Story,Story 3.1: Set minimum stock per medicine,"As a pharmacy manager, I want to set a minimum stock level for each medicine, so that the system knows when to reorder.",High,2,Epic 3: Re-order and Supplier Dispatch,Sprint 2
+Story,Story 3.2: Draft purchase order at low stock,"As a pharmacy manager, I want a draft purchase order created when stock falls below its minimum, so that shortages are prevented without manual checks.",High,5,Epic 3: Re-order and Supplier Dispatch,Sprint 2
+Story,Story 3.3: Supplier views dispatched orders,"As a supplier, I want to see the purchase orders dispatched to me, so that I can prepare the delivery.",Medium,3,Epic 3: Re-order and Supplier Dispatch,Sprint 2
+Story,Story 4.1: Inventory status screen,"As a pharmacy staff member, I want one screen showing the quantity, expiry date and status of every batch, so that I can answer stock questions quickly.",Medium,3,Epic 4: Inventory Visibility and Performance,Sprint 2
+Story,Story 4.2: Performance and availability report,"As a pharmacy manager, I want a report on response times and uptime, so that I can confirm the system copes with busy hours.",Low,3,Epic 4: Inventory Visibility and Performance,Backlog
